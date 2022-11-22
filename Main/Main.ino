@@ -5,6 +5,7 @@
 #include <ros.h>
 #include <std_msgs/Int32.h>
 #include <std_msgs/Float32.h>
+#include <string.h>
 //Libreria Encoder
 #include <Encoder.h>
 //Libreria Motor
@@ -15,7 +16,7 @@ float a,ref_smooth=0,Hz;
 long g_ant,grados;
 unsigned long timeold = 0;
 
-float a_n;
+//float a_n;
 char buffer[250];
 
 //Nodo de ROS nh
@@ -36,7 +37,7 @@ ros::Publisher refsmooth("refsmooth", &info_refsmooth);
 //Callback Subcriber and publisher
 void valor_ref( const std_msgs::Int32& v_ref){
   ref=v_ref.data;
-  info_sub1.data=ref;
+  info_sub1.data=a;
   vref.publish(&info_sub1);
 }
 
@@ -82,21 +83,33 @@ void setup() {
   nh.advertise(refsmooth);
   nh.subscribe(sub1);
   
-  if (!nh.getParam("~an",&a_n,3)){
+  if (!nh.getParam("~an",&a,1)){
   //default values
-    a_n=100;
+    a=100;
   }
 
+  if (!nh.getParam("~kp",&kp,1)){
+  //default values
+    kp=1;
+  }
+
+  if (!nh.getParam("~ki",&ki,1)){
+  //default values
+    ki=5;
+  }
+  sprintf(buffer,"a=",a);
+  nh.loginfo(buffer);
+  //nh.loginfo(a);
   //Variables de control
-  kp=2;
-  ki=10; 
+  //kp=2;
+  //ki=10; 
   
   // saturación de la integral 
   int_bound=1.8;
 
   //Referencia, configurable por ROS
   ref=0;
-  a = 600;
+  //a = 600;
 
   //Hertz
   Hz=20;  
